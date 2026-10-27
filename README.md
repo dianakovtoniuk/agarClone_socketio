@@ -138,7 +138,3 @@ src/
     styles.css
     public/images/            static images
 ```
-
-## Credits
-
-Based on the Socket.IO course by Robert Bunch.

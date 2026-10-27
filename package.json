@@ -1,0 +1,22 @@
+{
+  "name": "agarclone",
+  "version": "1.0.0",
+  "description": "Multiplayer agar.io clone built with Express and Socket.IO",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "socket.io",
+    "websockets",
+    "canvas",
+    "game"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@socket.io/admin-ui": "^0.5.1",
+    "express": "^4.18.2",
+    "socket.io": "^4.6.1"
+  }
+}

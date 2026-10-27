@@ -1,5 +1,9 @@
 //connect to the socket server!
-const socket = io.connect('http://localhost:9000');
+//the backend URL: localhost while developing, the Render URL in production
+const SERVER_URL = location.hostname === 'localhost'
+    ? 'http://localhost:9000'
+    : 'https://your-backend.onrender.com'; // TODO: replace with your Render URL
+const socket = io.connect(SERVER_URL);
 
 const init = async()=>{
         //init is called inside of start-game click listener

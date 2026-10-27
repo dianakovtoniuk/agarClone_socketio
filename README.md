@@ -1,4 +1,4 @@
-# Agar Clone (TypeScript)
+# Agar Clone
 
 A multiplayer clone of agar.io built with TypeScript, Node.js, Express, Socket.IO and the HTML canvas API. Players move blobs around a shared world, absorb orbs to grow, and eat smaller players.
 

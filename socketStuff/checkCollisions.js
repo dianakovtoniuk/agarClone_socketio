@@ -34,5 +34,57 @@ const checkForOrbCollisions = (pData,pConfig, orbs, settings)=>{
     };
     return null
 }
+        
+const checkForPlayerCollisions = (pData,pConfig,players,playersForUsers,playerId)=>{
+    //PLAYER COLLISIONS	
+    for(let i = 0; i<players.length; i++){
+        const p = players[i];
+        if(p.socketId && p.socketId != playerId){ //Added p.socketId test in case player has been removed from players
+            let pLocx = p.playerData.locX
+            let pLocy = p.playerData.locY
+            let pR = p.playerData.radius
+        // AABB Test - Axis-aligned bounding boxes
+            if(pData.locX + pData.radius + pR > pLocx
+            && pData.locX < pLocx + pData.radius + pR
+            && pData.locY + pData.radius + pR > pLocy 
+            && pData.locY < pLocy + pData.radius + pR){
+                // console.log("Hit square test!");
+        // Pythagoras test
+                distance = Math.sqrt(
+                    ((pData.locX - pLocx) * (pData.locX - pLocx)) + 
+                    ((pData.locY - pLocy) * (pData.locY - pLocy))	
+                    );      
+                if(distance < pData.radius + pR){
+            //COLLISION!!
+                    if(pData.radius > pR){
+                // ENEMY DEATH
+                        pData.score += (p.playerData.score + 10);
+                        pData.playersAbsorbed += 1;
+                        p.alive = false;
+                        pData.radius += p.playerData.radius * 0.25
+                        const collisionData = {
+                            absorbed: p.playerData.name,
+                            absorbedBy: pData.name,
+                        }
 
-module.exports = {checkForOrbCollisions}
+                        if(pConfig.zoom > 1){
+                            pConfig.zoom -= (pR * 0.25) * .001;
+                        }
+                        players.splice(i, 1,{}); //remove player from server players array
+                        playersForUsers.splice(i,1,{}) //remove player from players array used by clients
+                        return collisionData; //essentially a return statement (because I could't get it work without a promise?)
+                        break;
+                    }
+                    
+                    //This code could check to see if it the player who tocked was hit.
+                    //It is commented out since the above code should run on the other player's tock 
+                    //In other words, we only need to consider it a "death" on the attacking players turn
+                    // else if(pData.radius < pR){ }
+                }
+            }
+        }
+    }
+    return null;
+}
+
+module.exports = {checkForOrbCollisions, checkForPlayerCollisions}

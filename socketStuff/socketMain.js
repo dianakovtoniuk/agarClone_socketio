@@ -3,6 +3,7 @@ const io = require('../servers').io;
 //oh... we need express, get app, but only put what we need to inside of our socket stuff
 const app = require('../servers').app;
 const checkForOrbCollisions = require('./checkCollisions').checkForOrbCollisions;
+const checkForPlayerCollisions = require('./checkCollisions').checkForPlayerCollisions;
 
 //================CLASSES================
 const Player = require('./classes/Player');
@@ -93,6 +94,13 @@ io.on('connect',(socket)=>{
             //emit to all sockets playing the game, the orbSwitch event so it can update orbs... just the new orb
             io.to('game').emit('orbSwitch',orbData);
             //emit to all sockets playing the game, the updateLeaderBoard event because someone just scored
+            io.to('game').emit('updateLeaderBoard',getLeaderBoard());
+        }
+
+        //player collisions of tocking player
+        const absorbData = checkForPlayerCollisions(player.playerData,player.playerConfig,players,playersForUsers,socket.id)
+        if(absorbData){
+            io.to('game').emit('playerAbsorbed',absorbData)
             io.to('game').emit('updateLeaderBoard',getLeaderBoard());
         }
 

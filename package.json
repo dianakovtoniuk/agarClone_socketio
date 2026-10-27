@@ -1,22 +1,33 @@
 {
-  "name": "agarclone",
+  "name": "agar-clone-ts",
   "version": "1.0.0",
-  "description": "Multiplayer agar.io clone built with Express and Socket.IO",
-  "main": "index.js",
+  "description": "Multiplayer agar.io clone built with TypeScript, Express, Socket.IO and the canvas API",
+  "private": true,
   "scripts": {
-    "start": "node index.js"
+    "dev:server": "tsx watch src/server/index.ts",
+    "dev:client": "vite",
+    "build:server": "tsc -p tsconfig.server.json",
+    "build:client": "tsc -p tsconfig.client.json && vite build",
+    "build": "npm run build:server && npm run build:client",
+    "start": "node dist/server/index.js",
+    "typecheck": "tsc -p tsconfig.server.json --noEmit && tsc -p tsconfig.client.json"
   },
-  "keywords": [
-    "socket.io",
-    "websockets",
-    "canvas",
-    "game"
-  ],
-  "author": "",
+  "keywords": ["typescript", "socket.io", "websockets", "canvas", "game"],
   "license": "ISC",
   "dependencies": {
     "@socket.io/admin-ui": "^0.5.1",
-    "express": "^4.18.2",
-    "socket.io": "^4.6.1"
+    "express": "^5.0.0",
+    "socket.io": "^4.8.0"
+  },
+  "devDependencies": {
+    "@popperjs/core": "^2.11.8",
+    "@types/bootstrap": "^5.2.10",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.0.0",
+    "bootstrap": "^5.3.3",
+    "socket.io-client": "^4.8.0",
+    "tsx": "^4.19.0",
+    "typescript": "~5.9.2",
+    "vite": "^7.0.0"
   }
 }

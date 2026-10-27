@@ -2,6 +2,7 @@
 const io = require('../servers').io;
 //oh... we need express, get app, but only put what we need to inside of our socket stuff
 const app = require('../servers').app;
+const checkForOrbCollisions = require('./checkCollisions').checkForOrbCollisions;
 
 //================CLASSES================
 const Player = require('./classes/Player');
@@ -56,6 +57,47 @@ io.on('connect',(socket)=>{
         ackCallback({orbs,indexInPlayers:playersForUsers.length-1}) //send the orbs array back as an ack function!
     })
 
+    //the client sent over a tock!
+    socket.on('tock',(data)=>{
+        //a tock has come in before the player is set up.
+        //this is because the client kept tocking after disconnect
+        if(!player.playerConfig){
+            return;
+        }
+        const speed = player.playerConfig.speed;
+        const xV = player.playerConfig.xVector = data.xVector;
+        const yV = player.playerConfig.yVector = data.yVector;
+
+        //if player can move in the x, move
+        if((player.playerData.locX > 5 && xV < 0) || (player.playerData.locX < settings.worldWidth) && (xV > 0)){
+            player.playerData.locX += speed * xV;
+        }
+        //if player can move in the y, move
+        if((player.playerData.locY > 5 && yV > 0) || (player.playerData.locY < settings.worldHeight) && (yV < 0)){
+            player.playerData.locY -= speed * yV;
+        }  
+
+        //check for the tocking player to hit orbs
+        const capturedOrbI = checkForOrbCollisions(player.playerData,player.playerConfig,orbs,settings);
+        //function returns null if not collision, an index if there is a collision
+        if(capturedOrbI !== null){ //index could be 0, so check !null
+            //remove the orb that needs to be replaced (at capturedOrbI)
+            //add a new Orb
+            orbs.splice(capturedOrbI,1,new Orb(settings));
+
+            //now update the clients with the new orb
+            const orbData = {
+                capturedOrbI,
+                newOrb: orbs[capturedOrbI],
+            }
+            //emit to all sockets playing the game, the orbSwitch event so it can update orbs... just the new orb
+            io.to('game').emit('orbSwitch',orbData);
+            //emit to all sockets playing the game, the updateLeaderBoard event because someone just scored
+            io.to('game').emit('updateLeaderBoard',getLeaderBoard());
+        }
+
+    })
+
     socket.on('disconnect',(reason)=>{
         // console.log(reason)
         //loop through players and find the player with THIS players socketId
@@ -81,4 +123,18 @@ function initGame(){
     for(let i = 0; i < settings.defaultNumberOfOrbs; i++){
         orbs.push(new Orb(settings));
     }
+}
+
+function getLeaderBoard(){
+    const leaderBoardArray = players.map(curPlayer=>{
+        if(curPlayer.playerData){
+            return{
+                name: curPlayer.playerData.name,
+                score: curPlayer.playerData.score,
+            }
+        }else{
+            return {}
+        }
+    })
+    return leaderBoardArray;
 }

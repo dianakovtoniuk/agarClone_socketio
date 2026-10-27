@@ -6,6 +6,13 @@ const init = async()=>{
         const initData = await socket.emitWithAck('init',{
             playerName: player.name
         }) 
+        //our await has resolved, so start 'tocking'
+        setInterval(async()=>{
+            socket.emit('tock',{
+                xVector: player.xVector ? player.xVector : .1,
+                yVector: player.yVector ? player.yVector : .1,
+            })
+        },33)
         // console.log(initData.orbs);
         orbs = initData.orbs; 
         player.indexInPlayers = initData.indexInPlayers;   
@@ -21,3 +28,26 @@ const init = async()=>{
             player.locY = players[player.indexInPlayers].playerData.locY
         }
     })
+
+    socket.on('orbSwitch',orbData=>{
+        //the server just told us that an orb was absorbed. Replace it in the orbs array!
+        orbs.splice(orbData.capturedOrbI,1,orbData.newOrb);
+    })
+
+    socket.on('updateLeaderBoard',leaderBoardArray=>{
+        // console.log(leaderBoardArray)
+        leaderBoardArray.sort((a,b)=>{
+            return b.score - a.score;
+        })
+        document.querySelector('.leader-board').innerHTML = "";
+        leaderBoardArray.forEach(p=>{
+            if(!p.name){
+                return;
+            }
+            document.querySelector('.leader-board').innerHTML += `
+                <li class="leaderboard-player">${p.name} - ${p.score}</li>
+            `
+        })
+        const el = leaderBoardArray.find(u=>u.name === player.name)
+        document.querySelector('.player-score').innerHTML = el.score
+})
